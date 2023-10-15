@@ -49,7 +49,7 @@ public class PilotController : Controller
     {
         var pilot = await _pilotService.InsertAsync(request);
 
-        return CreatedAtRoute("GetByIdAsync", new {id = pilot.Id}, pilot);
+        return CreatedAtAction("GetById", new {id = pilot.Id}, pilot);
     }
     
     [HttpPut("{id}")]
