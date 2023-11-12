@@ -16,12 +16,21 @@ public class AutoMapperProfile : Profile
     private void CreateAircraftMap()
     {
         CreateMap<AircraftRequest, Aircraft>();
-        CreateMap<Aircraft, AircraftResponse>();
+        
+        //Response
+        CreateMap<Aircraft, AircraftResponse>()
+            .ForMember(dest => dest.Pilots, 
+                opt => opt.MapFrom<PilotResolver>());
     }
     
     private void CreatePilotMap()
     {
         CreateMap<PilotRequest, Pilot>();
-        CreateMap<Pilot, PilotResponse>();
+        
+        //Response
+        CreateMap<Pilot, PilotResponse>()
+            .ForMember(dest => dest.Aircrafts,
+                opt => opt.MapFrom<AircraftResolver>());
+        
     }
 }
