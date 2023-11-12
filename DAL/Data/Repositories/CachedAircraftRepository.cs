@@ -25,19 +25,6 @@ public class CachedAircraftRepository : IAircraftRepository
         return full ? $"aircrafts.full:{id}" : $"aircrafts:{id}";
     }
 
-    public Task<IEnumerable<Aircraft>> GetAsync()
-    {
-        string cacheKey = $"aircrafts.all";
-        
-        return _memoryCache.GetOrCreateAsync(cacheKey, entry =>
-        {
-            entry.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(10);
-            entry.Size = (entry.Value as IEnumerable<Aircraft>)?.Count() ?? 0;
-            
-            return _decorated.GetAsync();
-        });
-    }
-
     public Task<Aircraft> GetByIdAsync(int id)
     {
         string cacheKey = GetAircraftCacheKey(id);

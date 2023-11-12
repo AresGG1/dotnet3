@@ -24,40 +24,6 @@ public class CachedPilotRepository : IPilotRepository
         return full ? $"pilots.full:{id}" : $"pilots:{id}";
     }
     
-    public async Task<IEnumerable<Pilot>> GetAsync()
-    {
-        string cacheKey = "pilots:all";
-        string? cachedPilots = await _cache.GetStringAsync(cacheKey);
-
-        IEnumerable<Pilot> pilots;
-        
-        if (string.IsNullOrEmpty(cachedPilots))
-        {
-            pilots = await _decorated.GetAsync();
-            var options = new DistributedCacheEntryOptions
-            {
-                SlidingExpiration = TimeSpan.FromSeconds(100),
-            };
-
-            var resolver = new IgnorePropertiesResolver();
-            resolver.IgnoreProperty(typeof(Aircraft), "Pilots");
-
-            var settings = new JsonSerializerSettings { ContractResolver = resolver };
-            
-            await _cache.SetStringAsync(
-                cacheKey,
-                JsonConvert.SerializeObject(pilots, settings),
-                options
-            );
-
-            return pilots;
-        }
-
-        pilots = JsonConvert.DeserializeObject<PagedList<Pilot>>(cachedPilots);
-
-        return pilots;
-    }
-
     public async Task<Pilot> GetByIdAsync(int id)
     {
         string cacheKey = GetPilotCacheKey(id);

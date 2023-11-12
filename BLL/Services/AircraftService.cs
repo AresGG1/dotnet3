@@ -24,12 +24,6 @@ public class AircraftService : IAircraftService
         _aircraftRepository = unitOfWork.AircraftRepository;
     }
     
-    public async Task<IEnumerable<AircraftResponse>> GetAsync()
-    {
-        var aircrafts = await _aircraftRepository.GetAsync();
-        
-        return aircrafts?.Select(_mapper.Map<Aircraft, AircraftResponse>);    
-    }
 
     public async Task<PagedList<AircraftResponse>> GetAsync(AircraftParameters parameters)
     {

@@ -7,8 +7,6 @@ namespace BLL.Interfaces.Services;
 
 public interface IPilotService
 {
-    Task<IEnumerable<PilotResponse>> GetAsync();
-
     Task<PagedList<PilotResponse>> GetAsync(PilotParameters parameters);
     
     Task<PilotResponse> GetByIdAsync(int id);

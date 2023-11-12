@@ -17,8 +17,6 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
         Table = databaseContext.Set<T>();
     }
     
-    public virtual async Task<IEnumerable<T>> GetAsync() => await Table.ToListAsync();
-
     public virtual async Task<T> GetByIdAsync(int id)
     {
         return await Table.FindAsync(id)

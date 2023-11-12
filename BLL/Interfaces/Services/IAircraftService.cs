@@ -7,7 +7,6 @@ namespace BLL.Interfaces.Services;
 
 public interface IAircraftService
 {
-    Task<IEnumerable<AircraftResponse>> GetAsync();
 
     Task<PagedList<AircraftResponse>> GetAsync(AircraftParameters parameters);
     

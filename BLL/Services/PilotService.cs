@@ -23,13 +23,6 @@ public class PilotService : IPilotService
         _mapper = mapper;
         _pilotRepository = unitOfWork.PilotRepository;
     }
-    
-    public async Task<IEnumerable<PilotResponse>> GetAsync()
-    {
-        var pilots = await _pilotRepository.GetAsync();
-        
-        return pilots?.Select(_mapper.Map<Pilot, PilotResponse>);
-    }
 
     public async Task<PagedList<PilotResponse>> GetAsync(PilotParameters parameters)
     {
