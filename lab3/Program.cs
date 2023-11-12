@@ -4,6 +4,7 @@ using BLL.Interfaces.Services;
 using BLL.Services;
 using BLL.Validation.Requests;
 using DAL;
+using DAL.Cache;
 using DAL.Data;
 using DAL.Data.Repositories;
 using DAL.Interfaces;
@@ -26,6 +27,15 @@ builder.Services.AddValidatorsFromAssemblyContaining<AircraftRequestValidator>()
 builder.Services.AddValidatorsFromAssemblyContaining<PilotAircraftRequestValidator>();
 builder.Services.AddFluentValidationAutoValidation().AddFluentValidationClientsideAdapters();
 
+builder.Services.AddSingleton<CustomMemoryCache>();
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "";
+});
+
+
 builder.Services.AddDbContext<AirportDatabaseContext>(
     options => options.UseMySql(
         connectionString,
@@ -34,8 +44,10 @@ builder.Services.AddDbContext<AirportDatabaseContext>(
     );
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
-builder.Services.AddScoped<IPilotRepository, PilotRepository>();
+builder.Services.AddScoped<AircraftRepository>();
+builder.Services.AddScoped<IAircraftRepository, CachedAircraftRepository>();
+builder.Services.AddScoped<PilotRepository>();
+builder.Services.AddScoped<IPilotRepository, CachedPilotRepository>();
 
 builder.Services.AddScoped<IAircraftService, AircraftService>();
 builder.Services.AddScoped<IPilotService, PilotService>();

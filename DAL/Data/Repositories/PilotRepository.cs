@@ -83,9 +83,9 @@ public class PilotRepository : GenericRepository<Pilot>, IPilotRepository
         source = source.Where(a => a.LastName.Contains(lastName));
     }
     
-    private void SearchByAge(ref IQueryable<Pilot> source, int age)
+    private void SearchByAge(ref IQueryable<Pilot> source, int? age)
     {
-        if (age == 0)
+        if (age is null)
         {
             return;
         }
@@ -93,14 +93,14 @@ public class PilotRepository : GenericRepository<Pilot>, IPilotRepository
         source = source.Where(a => a.Age == age);
     }
     
-    private void SearchByRating(ref IQueryable<Pilot> source, double rating)
+    private void SearchByRating(ref IQueryable<Pilot> source, double? rating)
     {
-        if (rating == 0)
+        if (rating is null)
         {
             return;
         }
 
-        source = source.Where(a => Math.Abs(a.Rating - rating) < 1);
+        source = source.Where(a => Math.Abs(a.Rating - rating.Value) < 1);
     }
     
 }

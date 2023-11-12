@@ -52,6 +52,11 @@ public class PagedList<T> : List <T>
         return new(items, totalEntitiesCount, pageNumber, pageSize);
     }
 
+    public PagedList()
+    {
+        
+    }
+
     public PagedList(
         IEnumerable<T> items,
         int totalEntitiesCount,

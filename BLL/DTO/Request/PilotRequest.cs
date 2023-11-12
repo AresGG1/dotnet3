@@ -4,7 +4,6 @@ namespace BLL.DTO.Request;
 
 public class PilotRequest
 {
-    public int Id { get; set; }
     
     [MaxLength(30, ErrorMessage = "FirstName Max length is 30.")]
     [Required(ErrorMessage = "FirstName is required.")]

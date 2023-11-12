@@ -63,9 +63,9 @@ public class AircraftRepository : GenericRepository<Aircraft>, IAircraftReposito
         source = source.Where(a => a.Model.Contains(model));
     }
     
-    private void SearchByYear(ref IQueryable<Aircraft> source, int year)
+    private void SearchByYear(ref IQueryable<Aircraft> source, int? year)
     {
-        if (year == 0)
+        if (null == year)
         {
             return;
         }
@@ -73,9 +73,9 @@ public class AircraftRepository : GenericRepository<Aircraft>, IAircraftReposito
         source = source.Where(a => a.Year == year);
     }
     
-    private void SearchByHours(ref IQueryable<Aircraft> source, int hours)
+    private void SearchByHours(ref IQueryable<Aircraft> source, int? hours)
     {
-        if (hours == 0)
+        if (null == hours)
         {
             return;
         }
