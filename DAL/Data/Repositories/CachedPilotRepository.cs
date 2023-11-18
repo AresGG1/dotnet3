@@ -5,6 +5,7 @@ using DAL.Pagination;
 using DAL.Parameters;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace DAL.Data.Repositories;
 
@@ -12,7 +13,6 @@ public class CachedPilotRepository : IPilotRepository
 {
     private readonly IDistributedCache _cache;
     private readonly PilotRepository _decorated;
-
     public CachedPilotRepository(IDistributedCache cache, PilotRepository pilotRepository)
     {
         _cache = cache;
@@ -79,23 +79,21 @@ public class CachedPilotRepository : IPilotRepository
         return pilot;
     }
 
-    public Task<Pilot> InsertAsync(Pilot entity)
+    public async Task<Pilot> InsertAsync(Pilot entity)
     {
-        throw new NotImplementedException();
+        PurgeCache();
+        return await _decorated.InsertAsync(entity);
     }
 
     public async Task UpdateAsync(Pilot entity)
     {
-        await _cache.RemoveAsync(GetPilotCacheKey(entity.Id));
-        await _cache.RemoveAsync(GetPilotCacheKey(entity.Id, true));
-        
+        PurgeCache(entity.Id);
         await _decorated.UpdateAsync(entity);
     }
 
     public async Task DeleteAsync(int id)
     {
-        await _cache.RemoveAsync(GetPilotCacheKey(id));
-        await _cache.RemoveAsync(GetPilotCacheKey(id, true));
+        PurgeCache(id);
         
         await _decorated.DeleteAsync(id);
     }
@@ -112,7 +110,7 @@ public class CachedPilotRepository : IPilotRepository
             pilots = await _decorated.GetAsync(parameters);
             var options = new DistributedCacheEntryOptions
             {
-                SlidingExpiration = TimeSpan.FromSeconds(10),
+                SlidingExpiration = TimeSpan.FromSeconds(100),
             };
 
             var resolver = new IgnorePropertiesResolver();
@@ -147,5 +145,40 @@ public class CachedPilotRepository : IPilotRepository
         };
 
         return "pilots.paged:" + string.Join("_", keyParts.Where(part => !string.IsNullOrEmpty(part)));
+    }
+
+    private async void PurgeCache(int? id=null)
+    {
+        ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("localhost");
+        var server = redis.GetServer("localhost", 6379); 
+
+
+        var pageSize = 250;
+        var cursor = (RedisValue) "0";
+
+        do
+        {
+            var redisResult = await server.ExecuteAsync(
+                "SCAN",
+                cursor,
+                "MATCH",
+                "pilots.paged*",
+                "COUNT",
+                pageSize);
+            
+            var innerResult = (RedisResult[])redisResult;
+            cursor = (RedisValue)innerResult[0];
+
+            foreach (var key in (RedisValue[])innerResult[1])
+            {
+                await _cache.RemoveAsync(key);
+            }
+        } while (cursor != "0");
+        
+        if (id is not null)
+        {
+            await _cache.RemoveAsync(GetPilotCacheKey(id.Value));
+            await _cache.RemoveAsync(GetPilotCacheKey(id.Value, true));
+        }
     }
 }

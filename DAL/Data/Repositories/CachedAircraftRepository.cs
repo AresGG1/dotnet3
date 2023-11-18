@@ -53,28 +53,19 @@ public class CachedAircraftRepository : IAircraftRepository
 
     public async Task<Aircraft> InsertAsync(Aircraft entity)
     {
-        _memoryCache.Remove("aircrafts.all");
-        foreach (var key in _cacheWraper.GetParameterKeys())
-        {
-            _memoryCache.Remove(key);
-        }
-        
+        PurgeCache();
         return await _decorated.InsertAsync(entity);
     }
 
     public async Task UpdateAsync(Aircraft entity)
     {
-        _memoryCache.Remove(GetAircraftCacheKey(entity.Id));
-        _memoryCache.Remove(GetAircraftCacheKey(entity.Id, full: true));
-        
+        PurgeCache(entity.Id);
         await _decorated.UpdateAsync(entity);
     }
 
     public async Task DeleteAsync(int id)
     {
-        _memoryCache.Remove(GetAircraftCacheKey(id));
-        _memoryCache.Remove(GetAircraftCacheKey(id, full: true));
-        
+        PurgeCache(id);
         await _decorated.DeleteAsync(id);
     }
 
@@ -108,5 +99,19 @@ public class CachedAircraftRepository : IAircraftRepository
         };
 
         return "aircrafts.paged:" + string.Join("_", keyParts.Where(part => !string.IsNullOrEmpty(part)));
+    }
+    private void PurgeCache(int? id=null)
+    {
+        _memoryCache.Remove("aircrafts.all");
+        foreach (var key in _cacheWraper.GetParameterKeys())
+        {
+            _memoryCache.Remove(key);
+        }
+
+        if (id is not null)
+        {
+            _memoryCache.Remove(GetAircraftCacheKey(id.Value));
+            _memoryCache.Remove(GetAircraftCacheKey(id.Value, full: true));   
+        }
     }
 }
