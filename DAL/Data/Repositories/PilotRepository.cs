@@ -56,6 +56,8 @@ public class PilotRepository : GenericRepository<Pilot>, IPilotRepository
         SearchByAge(ref source, pilotParameters.Age);
         SearchByRating(ref source, pilotParameters.Rating);
         
+        SearchByAircraftId(ref source, pilotParameters.AircraftId);
+        
         return await PagedList<Pilot>.ToPagedListAsync(
             source,
             pilotParameters.PageNumber,
@@ -101,6 +103,15 @@ public class PilotRepository : GenericRepository<Pilot>, IPilotRepository
         }
 
         source = source.Where(a => Math.Abs(a.Rating - rating.Value) < 1);
+    }
+    private void SearchByAircraftId(ref IQueryable<Pilot> source, int? aircraftId)
+    {
+        if (aircraftId is null)
+        {
+            return;
+        }
+
+        source = source.Where(p => p.Aircrafts.Any(a => a.Id == aircraftId.Value));
     }
     
 }

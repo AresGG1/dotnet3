@@ -140,6 +140,7 @@ public class CachedPilotRepository : IPilotRepository
             $"Rating={parameters.Rating?.ToString() ?? "any"}",
             $"FirstName={parameters.FirstName ?? "any"}",
             $"LastName={parameters.LastName ?? "any"}",
+            $"AircraftId={parameters.AircraftId?.ToString() ?? "any"}",
             $"PageNumber={parameters.PageNumber}",
             $"PageSize={parameters.PageSize}"
         };

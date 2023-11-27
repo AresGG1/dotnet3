@@ -6,4 +6,5 @@ public class PilotParameters : QueryStringParameters
     public string LastName { get; set; }
     public int? Age { get; set; }
     public double? Rating { get; set; }
+    public int? AircraftId { get; set; }
 }   
