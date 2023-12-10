@@ -12,9 +12,15 @@ using DAL.Interfaces.Repositories;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using lab3.Middlewares;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq();
+});
 
 builder.Services.AddSwaggerGen();
 

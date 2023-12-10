@@ -8,6 +8,8 @@ using DAL.Interfaces.Repositories;
 using DAL.Models;
 using DAL.Pagination;
 using DAL.Parameters;
+using MassTransit;
+using Shared;
 
 namespace BLL.Services;
 
@@ -15,12 +17,14 @@ public class AircraftService : IAircraftService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly IAircraftRepository _aircraftRepository;
 
-    public AircraftService(IUnitOfWork unitOfWork, IMapper mapper)
+    public AircraftService(IUnitOfWork unitOfWork, IMapper mapper, IPublishEndpoint publishEndpoint)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _publishEndpoint = publishEndpoint;
         _aircraftRepository = unitOfWork.AircraftRepository;
     }
     
@@ -46,6 +50,14 @@ public class AircraftService : IAircraftService
         var insertedAircraft = await _aircraftRepository.InsertAsync(aircraft);
 
         await _unitOfWork.SaveChangesAsync();
+
+        await _publishEndpoint.Publish<AircraftCreated>(new
+        {
+            Model = request.Model,
+            Manufacturer = request.Manufacturer,
+            Year = request.Year,
+            FlightHours = request.FlightHours
+        });
         
         return _mapper.Map<Aircraft, AircraftResponse>(insertedAircraft);
     }
